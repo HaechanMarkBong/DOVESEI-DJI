@@ -90,6 +90,13 @@ ros2 launch ros2_open_voc_landing_heatmap start_aerialview.launch.py
 ```
 Use `--show-args` to see explanations about the available parameters.
 
+### DJI
+```
+service call /wrapper/psdk_ros2/takeoff
+service call /wrapper/psdk_ros2/obtain_ctrl_authority
+topic pub -r 3  /wrapper/psdk_ros2/flight_control_setpoint_ENUposition_yaw  '{"axes":[0,0,100,0]}'
+```
+
 ## Results from Initial Pilot Experiments
 ### Using Satellite Images [(Aerial View Simulator)](https://github.com/ricardodeazambuja/ros2_satellite_aerial_view_simulator):
 In the samples below, the system was started at randomly chosen places in France (because they have free, high resolution tiles), at an altitude of 100m, and it only had access to the RGB image and the current altitude while the depth was saturated. The parameters were the default ones from [this launch file](https://github.com/ricardodeazambuja/ros2_open_voc_landing_heatmap/blob/e2d333c98daec0e9a223d1f67c035b4e51bcf0c1/src/ros2_open_voc_landing_heatmap/launch/start_aerialview.launch.py). The original videos generated using [ffmpeg](https://www.ffmpeg.org/) including all images, but with a fixed time between frames, are [here](assets/videos/) (for some reason GitHub is failing to show the videos using the html5 `<video>` tag, hence the gifs below...).
