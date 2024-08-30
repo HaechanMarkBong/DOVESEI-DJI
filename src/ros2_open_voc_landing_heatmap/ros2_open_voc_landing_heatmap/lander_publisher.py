@@ -12,7 +12,7 @@ import json
 import numpy as np
 import cv2
 from ros2_open_voc_landing_heatmap_srv.srv import GetLandingHeatmap
-from sensor_msgs.msg import Image as ImageMsg
+from sensor_msgs.msg import Image as ImageMsg, Joy
 from geometry_msgs.msg import Twist
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
@@ -78,6 +78,10 @@ class LandingStatus:
 class LandingModule(Node):
     def __init__(self, debug = False, savefile = None):
         super().__init__('landing_module')
+        # DJI Integration code #########################################
+        self.velocity_topic = self.create_publisher(Joy, "/wrapper/psdk_ros2/flight_control_setpoint_FLUvelocity_yawrate", 1)
+        ################################################################
+
         self.declare_parameter('img_topic', '/carla/flying_sensor/rgb_down/image')
         self.declare_parameter('depth_topic', '/carla/flying_sensor/depth_down/image')
         self.declare_parameter('heatmap_topic', '/heatmap')
@@ -633,7 +637,7 @@ class LandingModule(Node):
                         self.search4new_place_timer = 0
                         self.landing_status.state = LandingState.SEARCHING
                 else:
-                    self.landing_status.state = LandingState.CLIMBING          
+                    self.landing_status.state = LandingState.CLIMBING
             elif is_landing:
                 self.landing_status.state = LandingState.LANDING
                 self.giveup_landing_timer = 0
@@ -665,6 +669,11 @@ class LandingModule(Node):
             self.z_speed = self.z_gain_landing*self.z_speed_landing*self.landing_status.altitude
             self.z_speed = (self.z_speed if self.z_speed > self.z_min_speed_landing else self.z_min_speed_landing)
             z = -self.z_speed
+            # DJI Integration code #########################################
+            self.velocity_topic.publish(Joy(axes=[0, 0, z, 0]))
+            # self.rgb_pub.publish(self.img_buffer)
+            ################################################################
+
         elif self.landing_status.state == LandingState.CLIMBING:
             x = y = 0.0
             z = self.z_speed_climbing
